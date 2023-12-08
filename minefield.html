@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://unpkg.com/tailwindcss@2.2.19/dist/tailwind.min.css" />
+    <link href="https://fonts.googleapis.com/css?family=Work+Sans:200,400&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      .boxes-container {
+        width: 550px;
+        height: 550px;
+      }
+
+
+      .box {
+        width: 45px;
+        height: 47px;
+        background-color: grey;
+        border: 1px solid rgb(212, 212, 212);
+      }
+      .water-box {
+        background-color: aqua;
+      }
+      .water-box-visited{
+        background-color: blue;
+        color: white;
+      }
+
+      .start-box {
+        background-color: red;
+      }
+      .end-box {
+        background-color: green;
+      }
+    </style>
+    <title>MineField!</title>
+  </head>
+  <body>
+    <div class="game-container flex flex-col justify-center items-center">
+      <h1 class="game-message">Message</h1>
+      <div class="boxes-container flex flex-wrap"></div>
+    </div>
+    <audio id="stepaudio">
+        <source src="step.mp3" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
+    <audio id="looseaudio">
+      <source src="loose.mp3" type="audio/mp3">
+      Your browser does not support the audio element.
+      
+  </audio>
+  <audio id="winaudio">
+    <source src="achive-sound-132273.mp3" type="audio/mp3">
+    Your browser does not support the audio element.
+      </audio>
+    <script>
+      let visited=false;
+      // Get the audio element
+    var audio1 = document.getElementById("stepaudio");
+    var audio2 = document.getElementById("looseaudio");
+    var audio3 = document.getElementById("winaudio");
+      // Function to play the sound
+      function playSound1() {
+        audio1.play();
+    }
+    function playSound2(){
+      audio2.play();
+    }
+    function playSound3(){
+      audio3.play();
+    }
+      let N = 12;
+      let startIndex = 2;
+      let endIndex = 144;
+      let waterBoxes = [2, 3, 15, 16, 28, 29, 30, 42, 54, 55, 56,  68, 69, 70, 82, 94, 106, 105, 104, 116, 128,129,130,142,143,144];
+      let boxesContainer = document.querySelector('.boxes-container');
+      // 10 x 10
+      // loop to generate 100 boxes
+      generateInActiveGameBoard();
+
+      function generateActiveGameBoard() {
+        boxesContainer.innerHTML = '';
+        for (i = 1; i <= N * N; i++) {
+          // generate a box
+          let boxHTML = generateBoxHTML(i);
+          // append it to boxes container
+          boxesContainer.innerHTML += boxHTML;
+        
+        }
+        document.querySelectorAll('.water-box').forEach(function (waterBoxElement) {
+    waterBoxElement.addEventListener('click', function () {
+        playSound1();
+    });
+});
+
+       
+        document.querySelectorAll('.box').forEach(function (boxElement) {
+    boxElement.addEventListener('mouseover', function () {
+        if (!waterBoxes.includes(parseInt(boxElement.dataset.index))) {
+            userLost();
+            playSound2();
+         }else{
+          visited=true
+          boxElement.classList.add("water-box-visited")
+         } });
+});
+     
+
+   document.querySelector('.end-box').addEventListener('mouseover', function () {
+          updateGameMessage('You won!');
+          playSound3();
+         
+        });
+
+        document.querySelector('.boxes-container').addEventListener('mouseleave', userLost);
+      }
+
+      function userLost() {
+        // show you lose message
+        updateGameMessage('You lost! Try again.');
+        // reset board
+        generateInActiveGameBoard();
+      }
+
+      function generateInActiveGameBoard() {
+        boxesContainer.innerHTML = '';
+        visited=false;
+        for (i = 1; i <= N * N; i++) {
+          // generate a box
+          let boxHTML = generateInActiveBox(i);
+          // append it to boxes container
+          boxesContainer.innerHTML += boxHTML;
+        }
+        document.querySelector('.start-box').addEventListener('click', startGame);
+      }
+
+      function startGame() {
+        updateGameMessage('Game started, avoid the gray boxes!');
+        generateActiveGameBoard();
+      }
+
+      function updateGameMessage(message) {
+        document.querySelector('.game-message').innerHTML = message;
+      }
+
+      function generateBoxHTML(i) {
+        let isWater = waterBoxes.includes(i);
+        return `
+        <p data-index=${i} class="box ${i == startIndex ? 'start-box' : ''} ${i == endIndex ? 'end-box' : ''} ${isWater ? 'water-box' : ''} ${visited ? 'water-box-visited' : ''}">${i}</p>
+        `;
+      }
+
+      function generateInActiveBox(i) {
+        return `
+        <p class="box ${i == startIndex ? 'start-box' : ''}">${i}</p>
+        `;
+      }
+     
+    </script>
+  </body>
+</html>
